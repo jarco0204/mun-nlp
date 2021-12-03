@@ -50,21 +50,29 @@ def normalize(mfcc):
     norm = MinMaxScaler()
     return norm.fit_transform(np.abs(mfcc))
 
-def get_features(df, test_size = 0.2):
+def get_features(df, test_size = 0.2, debug=False):
     feats = []
     for idx, row in df.iterrows():
+        if idx%100 == 0:
+            print('Working on:', idx)
         audio = get_audio(df.loc[idx,['Audio']][0])
         mute_audio = remove_silence(audio)
         features = to_mfcc(mute_audio)
         feats.append(features)
+        if debug and idx == 10:
+            break
 
-    y = df.loc[:,['spanish']]
+    if debug:
+        y = np.array(df.loc[:11,['spanish', 'english']])
+        # y = np.array([i[0] for i in y])
+    else:
+        y = np.array(df.loc[:,['spanish', 'english']])
     feats, y = segments(feats, y)
     return train_test_split(feats,y,test_size=test_size)
 
 def save_state(model, filename):
     print('Saving module')
-    model.save(f'../{filename}.h5')
+    model.save(f'./{filename}.h5')
 
 def train_model(x_train, y_train, x_val, y_val, batch_size=128):
     rows = x_train[0].shape[0]
@@ -114,7 +122,8 @@ def train_model(x_train, y_train, x_val, y_val, batch_size=128):
 if __name__ == '__main__':
     filename = './data.csv'
     df = pd.read_csv(filename)
-    x_train, x_test, y_train, y_test = get_features(df)
+    debug = False
+    x_train, x_test, y_train, y_test = get_features(df, debug=debug)
     # print(test.shape)
 
     print('Entering postprocessing')
