@@ -2,3 +2,8 @@
 scripts/.DS_Store
 scripts/.ipynb_checkpoints
 /data/*
+data.csv
+data-norm.csv
+data-pre.csv
+
+/logs/*

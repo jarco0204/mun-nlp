@@ -4,7 +4,7 @@ from pydub import AudioSegment
 import os
 import sys
 import pandas as pd
-from features import remove_silence, to_mfcc, get_audio
+from features import remove_silence, to_mfcc, get_audio, normalize
 
 class AudioSet:
 
@@ -44,27 +44,29 @@ class AudioSet:
     def data_setup(self):
         self.check_folder
         for lang in ['spanish', 'english']:
+            # print(lang)
             cc = 0
             for i in range(500):
                 filename =f'./data/{lang}/' +lang + str(i) + '.wav'
-                filenames =f'../data/{lang}/' +lang + str(i) + '.wav'
+                # filenames =f'../data/{lang}/' +lang + str(i) + '.wav'
                 try:
                     file = AudioSegment.from_mp3(filename)
                 except:
                     continue
 
-
-                audio = get_audio(filename)
-                sil = remove_silence(audio)
-                features = to_mfcc(sil)
-                # if cc%399 == 0:
-                    # print(features)
+                features = None
+                # audio = get_audio(filename)
+                # sil = remove_silence(audio)
+                # features = to_mfcc(sil)
+                # features = normalize(features)
+                if cc%100 == 0:
+                    print(lang, cc)
                 sub = lang + str(cc)
                 spanish = 1 if lang == 'spanish' else 0
                 english = 1 if lang == 'english' else 0
                 chinese = 0
                 categorical = 'spanish' if spanish else 'english' if english else 'chinese'
-                self.audioDF.loc[len(self.audioDF.index)] = [filenames, features, sub, spanish, english, chinese, categorical]
+                self.audioDF.loc[len(self.audioDF.index)] = [filename, features, sub, spanish, english, chinese, categorical]
                 # print(self.audioDF)
                 cc+=1
                 # break
